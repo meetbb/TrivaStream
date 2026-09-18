@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		1590184C305C14BD00749F25 /* AudioStreamKit in Frameworks */ = {isa = PBXBuildFile; productRef = 1590184B305C14BD00749F25 /* AudioStreamKit */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		1590182E305BEC2800749F25 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -52,6 +56,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1590184C305C14BD00749F25 /* AudioStreamKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -112,6 +117,7 @@
 			);
 			name = TrivaStream;
 			packageProductDependencies = (
+				1590184B305C14BD00749F25 /* AudioStreamKit */,
 			);
 			productName = TrivaStream;
 			productReference = 15901820305BEC2700749F25 /* TrivaStream.app */;
@@ -195,6 +201,9 @@
 			);
 			mainGroup = 15901817305BEC2700749F25;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				1590184A305C14BD00749F25 /* XCLocalSwiftPackageReference "../AudioStreamKit" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 15901821305BEC2700749F25 /* Products */;
 			projectDirPath = "";
@@ -413,6 +422,10 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.sunbreathingcode.TrivaStream;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -445,6 +458,10 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.sunbreathingcode.TrivaStream;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -578,6 +595,20 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		1590184A305C14BD00749F25 /* XCLocalSwiftPackageReference "../AudioStreamKit" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../AudioStreamKit;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		1590184B305C14BD00749F25 /* AudioStreamKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = AudioStreamKit;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 15901818305BEC2700749F25 /* Project object */;
 }

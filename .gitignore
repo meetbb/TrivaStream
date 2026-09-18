@@ -1,0 +1,22 @@
+# AI Agent Instructions
+AGENTS.md
+**/AGENTS.md
+CLAUDE.md
+**/CLAUDE.md
+**/COMPONENT_MAP.md
+**/CURRENT_STATE.md
+.claude/
+
+
+# Xcode
+.DS_Store
+build/
+DerivedData/
+
+# Swift Package Manager
+.build/
+.swiftpm/
+
+# Xcode user-specific files
+xcuserdata/
+*.xcuserstate
