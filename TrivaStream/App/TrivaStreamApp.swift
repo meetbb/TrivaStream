@@ -14,7 +14,7 @@ import SwiftUI
 @main
 struct TrivaStreamApp: App {
     private let player = AudioPlayer()
-    private let repository: ContentRepository = StaticContentRepository()
+    private let repository: ContentRepository = BundledContentRepository()
 
     var body: some Scene {
         WindowGroup {
