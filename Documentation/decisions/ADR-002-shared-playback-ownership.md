@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted (2026-09-18)
+Accepted (2026-09-18). Amended 2026-09-21: see "Update" below.
 
 ## Summary
 
@@ -74,10 +74,26 @@ at startup and passed down explicitly.
   small amount of extra setup code, deliberately accepted for the clarity it
   buys.
 
+## Update (2026-09-21): the observing view model is single too
+
+`AudioPlayer.states` is a single-consumer `AsyncStream`: if two consumers
+iterate it, each receives only some of the events, and the others silently see
+stale state. So the one-instance rule extends to whoever observes it. Exactly
+one `PlayerViewModel` is created, at the composition root next to the player,
+and kept alive for the app's lifetime. It must not be created inside a view or
+scene builder closure, which SwiftUI may re-evaluate. A view model that is
+dropped cancels its observation task, so it releases the stream and the player.
+
+This makes the second-consumer trigger concrete: a "now playing" bar cannot
+simply create another observer. It needs one shared observer that fans state
+out (or shared state that both screens read), which is the decision ADR-004
+reserves for that moment.
+
 ## Consequences
 
 - Any new screen that needs to read or control playback must receive the
   shared `AudioPlayer` instance rather than creating its own.
+- Only one observer of `AudioPlayer.states` may exist at a time.
 - When a second consumer of playback state is actually added (e.g., a
   "now playing" bar), that is the trigger to decide the exact sharing
   mechanism, per [ADR-004](ADR-004-trigger-conditions-for-new-abstractions.md).

@@ -13,14 +13,14 @@ import SwiftUI
 /// constructs its own copy of either.
 @main
 struct TrivaStreamApp: App {
-    private let player = AudioPlayer()
     private let repository: ContentRepository = BundledContentRepository()
+    private let playerViewModel = PlayerViewModel(player: AudioPlayer())
 
     var body: some Scene {
         WindowGroup {
             LibraryView(
                 libraryViewModel: LibraryViewModel(repository: repository),
-                playerViewModel: PlayerViewModel(player: player)
+                playerViewModel: playerViewModel
             )
         }
     }
