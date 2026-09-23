@@ -132,3 +132,38 @@ maintainable today, with an explicit, written-down rule
 ([ADR-004](../decisions/ADR-004-trigger-conditions-for-new-abstractions.md))
 for adding more structure only when a real need for it shows up — not
 before, and not by accident.
+
+## 8. Real-World Check: Freesound Search (2026-09-23)
+
+Search against a remote catalog (Freesound.org) is exactly the second real
+data source this evaluation anticipated in §6, and ADR-004's trigger 1 (a
+second, genuinely different real-world case, not a hypothetical one). It
+was a useful test of whether the structure chosen above actually holds up
+once that anticipated case arrived, rather than just in theory.
+
+What it confirmed:
+
+- `ContentRepository` (§4, ADR-003) absorbed the new capability by adding
+  one method, `search(query:)` with a default no-op — no new protocol was
+  needed, because the seam was already the right shape for "a screen asks
+  for content data" regardless of where that data comes from.
+- The one thing this evaluation's §4 comparison didn't anticipate: a single
+  screen (`LibraryViewModel`) now needs *two different sources* for the
+  *same* protocol's two methods (bundled catalog for `fetchCatalog()`,
+  Freesound for `search(query:)`). This was resolved with
+  `CompositeContentRepository`, a concrete type that implements
+  `ContentRepository` by delegating each method to a different underlying
+  source. This is not a new architectural layer — it's a second
+  *implementation* of the existing protocol — so it didn't require a new
+  ADR-004 trigger of its own; ADR-003's original repository decision still
+  covers it.
+- No changes were needed to `PlayerViewModel`, `PlayerView`, or
+  AudioStreamKit: Freesound preview URLs flow through the existing
+  `MediaCatalogItem` → `AudioPlayer.load` path unchanged, which is the
+  payoff §2 and §3 argued for — TrivaStream doesn't need to build its own
+  protection around networking or streaming because AudioStreamKit already
+  owns that.
+
+Net result: the smallest structure held. One new protocol method, two new
+concrete `ContentRepository` implementations, no new layers, no changes to
+the playback boundary.
