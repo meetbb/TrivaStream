@@ -15,8 +15,10 @@ final class LibraryViewModel {
     private(set) var items: [MediaCatalogItem] = []
     private(set) var isLoading = false
     private(set) var errorMessage: String?
+    var searchText = ""
 
     private let repository: ContentRepository
+    private var catalogItems: [MediaCatalogItem] = []
 
     init(repository: ContentRepository) {
         self.repository = repository
@@ -28,7 +30,36 @@ final class LibraryViewModel {
         defer { isLoading = false }
 
         do {
-            items = try await repository.fetchCatalog()
+            catalogItems = try await repository.fetchCatalog()
+            items = catalogItems
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    /// Debounced against rapid typing: the view re-runs this in a `.task(id: searchText)`,
+    /// which cancels the in-flight call whenever `searchText` changes, so only the sleep for
+    /// the latest keystroke survives long enough to fire.
+    func search() async {
+        let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !query.isEmpty else {
+            items = catalogItems
+            errorMessage = nil
+            return
+        }
+
+        do {
+            try await Task.sleep(for: .milliseconds(400))
+        } catch {
+            return
+        }
+
+        isLoading = true
+        errorMessage = nil
+        defer { isLoading = false }
+
+        do {
+            items = try await repository.search(query: query)
         } catch {
             errorMessage = error.localizedDescription
         }

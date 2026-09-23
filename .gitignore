@@ -22,3 +22,6 @@ DerivedData/
 # Xcode user-specific files
 xcuserdata/
 *.xcuserstate
+
+# Local secrets (see Secrets.xcconfig.example)
+Secrets.xcconfig

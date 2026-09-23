@@ -32,16 +32,66 @@ final class LibraryViewModelTests: XCTestCase {
         XCTAssertTrue(viewModel.items.isEmpty)
         XCTAssertNotNil(viewModel.errorMessage)
     }
+
+    func testSearchWithBlankQueryRestoresCatalogItems() async {
+        let catalogItems = [
+            MediaCatalogItem(title: "Bundled", artist: "Artist", url: URL(string: "https://example.com/bundled.mp3")!)
+        ]
+        let searchItems = [
+            MediaCatalogItem(title: "Freesound", artist: "Artist", url: URL(string: "https://example.com/found.mp3")!)
+        ]
+        let viewModel = LibraryViewModel(repository: StubContentRepository(items: catalogItems, searchItems: searchItems))
+        await viewModel.loadCatalog()
+
+        viewModel.searchText = ""
+        await viewModel.search()
+
+        XCTAssertEqual(viewModel.items, catalogItems)
+    }
+
+    func testSearchWithQueryReturnsRepositorySearchResults() async {
+        let catalogItems = [
+            MediaCatalogItem(title: "Bundled", artist: "Artist", url: URL(string: "https://example.com/bundled.mp3")!)
+        ]
+        let searchItems = [
+            MediaCatalogItem(title: "Freesound", artist: "Artist", url: URL(string: "https://example.com/found.mp3")!)
+        ]
+        let viewModel = LibraryViewModel(repository: StubContentRepository(items: catalogItems, searchItems: searchItems))
+        await viewModel.loadCatalog()
+
+        viewModel.searchText = "ocean"
+        await viewModel.search()
+
+        XCTAssertEqual(viewModel.items, searchItems)
+    }
+
+    func testSearchSurfacesRepositoryFailure() async {
+        let viewModel = LibraryViewModel(repository: StubContentRepository(searchError: URLError(.notConnectedToInternet)))
+
+        viewModel.searchText = "ocean"
+        await viewModel.search()
+
+        XCTAssertNotNil(viewModel.errorMessage)
+    }
 }
 
 private struct StubContentRepository: ContentRepository {
     var items: [MediaCatalogItem] = []
     var error: Error?
+    var searchItems: [MediaCatalogItem] = []
+    var searchError: Error?
 
     func fetchCatalog() async throws -> [MediaCatalogItem] {
         if let error {
             throw error
         }
         return items
+    }
+
+    func search(query: String) async throws -> [MediaCatalogItem] {
+        if let searchError {
+            throw searchError
+        }
+        return searchItems
     }
 }

@@ -13,8 +13,17 @@ import SwiftUI
 /// constructs its own copy of either.
 @main
 struct TrivaStreamApp: App {
-    private let repository: ContentRepository = BundledContentRepository()
+    private let repository: ContentRepository = CompositeContentRepository(
+        catalogSource: BundledContentRepository(),
+        searchSource: FreesoundContentRepository(apiKey: Self.freesoundAPIKey)
+    )
     private let playerViewModel = PlayerViewModel(player: AudioPlayer())
+
+    /// Injected via `Secrets.xcconfig` (gitignored) → `INFOPLIST_KEY_FreesoundAPIKey`, so the
+    /// real key never lands in source control.
+    private static var freesoundAPIKey: String {
+        Bundle.main.object(forInfoDictionaryKey: "FreesoundAPIKey") as? String ?? ""
+    }
 
     var body: some Scene {
         WindowGroup {

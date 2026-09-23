@@ -15,7 +15,9 @@ struct LibraryView: View {
         NavigationStack {
             content
                 .navigationTitle("Library")
+                .searchable(text: $libraryViewModel.searchText, prompt: "Search Freesound")
                 .task { await libraryViewModel.loadCatalog() }
+                .task(id: libraryViewModel.searchText) { await libraryViewModel.search() }
         }
     }
 

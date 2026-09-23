@@ -31,6 +31,7 @@
 		15901820305BEC2700749F25 /* TrivaStream.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TrivaStream.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1590182D305BEC2800749F25 /* TrivaStreamTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TrivaStreamTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		15901837305BEC2800749F25 /* TrivaStreamUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TrivaStreamUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		267E6822B084B13673BB5DCA /* Secrets.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Secrets.xcconfig; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -80,6 +81,7 @@
 		15901817305BEC2700749F25 = {
 			isa = PBXGroup;
 			children = (
+				267E6822B084B13673BB5DCA /* Secrets.xcconfig */,
 				15901822305BEC2700749F25 /* TrivaStream */,
 				15901830305BEC2800749F25 /* TrivaStreamTests */,
 				1590183A305BEC2800749F25 /* TrivaStreamUITests */,
@@ -401,6 +403,7 @@
 		};
 		15901842305BEC2800749F25 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 267E6822B084B13673BB5DCA /* Secrets.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -409,6 +412,7 @@
 				DEVELOPMENT_TEAM = 2GR8F8KEA7;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -437,6 +441,7 @@
 		};
 		15901843305BEC2800749F25 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 267E6822B084B13673BB5DCA /* Secrets.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -445,6 +450,7 @@
 				DEVELOPMENT_TEAM = 2GR8F8KEA7;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
