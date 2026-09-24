@@ -8,9 +8,9 @@
 import Foundation
 import os
 
-/// Searches Freesound.org's text search API (ADR-003's "possibly a remote API later").
-/// Freesound has no notion of a bundled "catalog," so `fetchCatalog()` returns nothing —
-/// this repository only ever contributes results via `search(query:)`.
+/// TrivaStream's sole content source: Freesound.org's text search API. `fetchCatalog()` and
+/// `search(query:)` both hit the same endpoint — an empty query returns Freesound's own default
+/// ordering, which is what `fetchCatalog()` uses for the Library screen's launch content.
 struct FreesoundContentRepository: ContentRepository {
     private static let logger = Logger(subsystem: "com.sunbreathingcode.TrivaStream", category: "ContentRepository")
     private static let searchURL = URL(string: "https://freesound.org/apiv2/search/text/")!
@@ -23,20 +23,25 @@ struct FreesoundContentRepository: ContentRepository {
         self.urlSession = urlSession
     }
 
+    /// Default Library content: an empty query returns all Freesound sounds in the API's own
+    /// relevance order. No custom `sort` yet — that's a separate, later decision.
     func fetchCatalog() async throws -> [MediaCatalogItem] {
-        []
+        try await performSearch(query: "")
     }
 
     func search(query: String) async throws -> [MediaCatalogItem] {
         let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return [] }
+        return try await performSearch(query: trimmed)
+    }
 
+    private func performSearch(query: String) async throws -> [MediaCatalogItem] {
         var components = URLComponents(url: Self.searchURL, resolvingAgainstBaseURL: false)!
         components.queryItems = [
-            URLQueryItem(name: "query", value: trimmed),
-            // Explicit field list: Freesound's default response omits `previews`, which is
-            // the only thing we actually need to play a result.
-            URLQueryItem(name: "fields", value: "id,name,username,previews"),
+            URLQueryItem(name: "query", value: query),
+            // Explicit field list: Freesound's default response omits `previews` (needed to
+            // play a result) and `images` (needed for the grid thumbnail).
+            URLQueryItem(name: "fields", value: "id,name,username,previews,images"),
         ]
 
         var request = URLRequest(url: components.url!)
@@ -73,7 +78,11 @@ struct FreesoundContentRepository: ContentRepository {
                 continue
             }
 
-            items.append(MediaCatalogItem(title: result.name, artist: result.username, url: previewURL))
+            let thumbnailURL = result.images?.waveformM.flatMap(URL.init(string:))
+            // Freesound's own sound id, not a fresh UUID: it's stable across repeated
+            // fetches of the same sound, so SwiftUI's diffing can recognize an unchanged
+            // reload instead of tearing down and rebuilding every grid cell.
+            items.append(MediaCatalogItem(id: String(result.id), title: result.name, artist: result.username, url: previewURL, thumbnailURL: thumbnailURL))
         }
 
         return items
@@ -85,9 +94,11 @@ private struct SearchResponse: Decodable {
 }
 
 private struct SearchResult: Decodable {
+    let id: Int
     let name: String
     let username: String
     let previews: Previews
+    let images: Images?
 
     struct Previews: Decodable {
         let previewHqMp3: String?
@@ -96,6 +107,14 @@ private struct SearchResult: Decodable {
         enum CodingKeys: String, CodingKey {
             case previewHqMp3 = "preview-hq-mp3"
             case previewLqMp3 = "preview-lq-mp3"
+        }
+    }
+
+    struct Images: Decodable {
+        let waveformM: String?
+
+        enum CodingKeys: String, CodingKey {
+            case waveformM = "waveform_m"
         }
     }
 }

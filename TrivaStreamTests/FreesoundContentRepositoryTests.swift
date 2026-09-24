@@ -15,6 +15,7 @@ final class FreesoundContentRepositoryTests: XCTestCase {
         {
             "results": [
                 {
+                    "id": 1,
                     "name": "Rain",
                     "username": "weatheruser",
                     "previews": {
@@ -37,6 +38,7 @@ final class FreesoundContentRepositoryTests: XCTestCase {
         {
             "results": [
                 {
+                    "id": 2,
                     "name": "Thunder",
                     "username": "weatheruser",
                     "previews": {
@@ -56,7 +58,7 @@ final class FreesoundContentRepositoryTests: XCTestCase {
         let json = """
         {
             "results": [
-                {"name": "Silent", "username": "user", "previews": {}}
+                {"id": 3, "name": "Silent", "username": "user", "previews": {}}
             ]
         }
         """.data(using: .utf8)!
@@ -70,8 +72,8 @@ final class FreesoundContentRepositoryTests: XCTestCase {
         let json = """
         {
             "results": [
-                {"name": "First", "username": "user", "previews": {"preview-hq-mp3": "https://example.com/dup.mp3"}},
-                {"name": "Second", "username": "user", "previews": {"preview-hq-mp3": "https://example.com/dup.mp3"}}
+                {"id": 4, "name": "First", "username": "user", "previews": {"preview-hq-mp3": "https://example.com/dup.mp3"}},
+                {"id": 5, "name": "Second", "username": "user", "previews": {"preview-hq-mp3": "https://example.com/dup.mp3"}}
             ]
         }
         """.data(using: .utf8)!
@@ -87,12 +89,102 @@ final class FreesoundContentRepositoryTests: XCTestCase {
         XCTAssertTrue(FreesoundContentRepository.parse(json).isEmpty)
     }
 
-    func testFetchCatalogReturnsEmptyList() async throws {
-        let repository = FreesoundContentRepository(apiKey: "test-key")
+    func testParseDecodesWaveformThumbnail() {
+        let json = """
+        {
+            "results": [
+                {
+                    "id": 6,
+                    "name": "Rain",
+                    "username": "weatheruser",
+                    "previews": {"preview-hq-mp3": "https://example.com/rain-hq.mp3"},
+                    "images": {"waveform_m": "https://example.com/rain-waveform.png"}
+                }
+            ]
+        }
+        """.data(using: .utf8)!
 
+        let items = FreesoundContentRepository.parse(json)
+
+        XCTAssertEqual(items.first?.thumbnailURL, URL(string: "https://example.com/rain-waveform.png"))
+    }
+
+    func testParseLeavesThumbnailNilWhenImagesMissing() {
+        let json = """
+        {
+            "results": [
+                {
+                    "id": 7,
+                    "name": "Rain",
+                    "username": "weatheruser",
+                    "previews": {"preview-hq-mp3": "https://example.com/rain-hq.mp3"}
+                }
+            ]
+        }
+        """.data(using: .utf8)!
+
+        let items = FreesoundContentRepository.parse(json)
+
+        XCTAssertNil(items.first?.thumbnailURL)
+    }
+
+    /// The fix for the grid-reload bug: `id` must come from Freesound's own stable sound id,
+    /// not a fresh random UUID, so an unchanged reload doesn't look like new rows to SwiftUI.
+    func testParseUsesFreesoundSoundIDAsStableItemID() {
+        let json = """
+        {
+            "results": [
+                {"id": 12345, "name": "Rain", "username": "weatheruser", "previews": {"preview-hq-mp3": "https://example.com/rain-hq.mp3"}}
+            ]
+        }
+        """.data(using: .utf8)!
+
+        let items = FreesoundContentRepository.parse(json)
+
+        XCTAssertEqual(items.first?.id, "12345")
+    }
+
+    func testFetchCatalogSendsEmptyQuery() async throws {
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.protocolClasses = [StubURLProtocol.self]
+        let session = URLSession(configuration: configuration)
+
+        let responseJSON = """
+        {"results": [{"id": 8, "name": "Ocean", "username": "user", "previews": {"preview-hq-mp3": "https://example.com/ocean.mp3"}}]}
+        """.data(using: .utf8)!
+
+        StubURLProtocol.stub = { request in
+            let queryItems = URLComponents(url: request.url!, resolvingAgainstBaseURL: false)?.queryItems ?? []
+            XCTAssertTrue(queryItems.contains(URLQueryItem(name: "query", value: "")))
+
+            let response = HTTPURLResponse(url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!
+            return (response, responseJSON)
+        }
+
+        let repository = FreesoundContentRepository(apiKey: "test-key", urlSession: session)
         let items = try await repository.fetchCatalog()
 
-        XCTAssertTrue(items.isEmpty)
+        XCTAssertEqual(items.map(\.title), ["Ocean"])
+    }
+
+    func testFetchCatalogThrowsOnNonSuccessResponse() async {
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.protocolClasses = [StubURLProtocol.self]
+        let session = URLSession(configuration: configuration)
+
+        StubURLProtocol.stub = { request in
+            let response = HTTPURLResponse(url: request.url!, statusCode: 500, httpVersion: nil, headerFields: nil)!
+            return (response, Data())
+        }
+
+        let repository = FreesoundContentRepository(apiKey: "test-key", urlSession: session)
+
+        do {
+            _ = try await repository.fetchCatalog()
+            XCTFail("Expected FreesoundError.requestFailed")
+        } catch {
+            XCTAssertTrue(error is FreesoundError)
+        }
     }
 
     func testSearchWithBlankQueryReturnsEmptyListWithoutNetworkCall() async throws {
@@ -109,7 +201,7 @@ final class FreesoundContentRepositoryTests: XCTestCase {
         let session = URLSession(configuration: configuration)
 
         let responseJSON = """
-        {"results": [{"name": "Ocean", "username": "user", "previews": {"preview-hq-mp3": "https://example.com/ocean.mp3"}}]}
+        {"results": [{"id": 8, "name": "Ocean", "username": "user", "previews": {"preview-hq-mp3": "https://example.com/ocean.mp3"}}]}
         """.data(using: .utf8)!
 
         StubURLProtocol.stub = { request in

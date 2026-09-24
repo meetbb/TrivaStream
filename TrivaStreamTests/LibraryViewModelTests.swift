@@ -34,29 +34,29 @@ final class LibraryViewModelTests: XCTestCase {
     }
 
     func testSearchWithBlankQueryRestoresCatalogItems() async {
-        let catalogItems = [
-            MediaCatalogItem(title: "Bundled", artist: "Artist", url: URL(string: "https://example.com/bundled.mp3")!)
+        let defaultItems = [
+            MediaCatalogItem(title: "Default", artist: "Artist", url: URL(string: "https://example.com/default.mp3")!)
         ]
         let searchItems = [
             MediaCatalogItem(title: "Freesound", artist: "Artist", url: URL(string: "https://example.com/found.mp3")!)
         ]
-        let viewModel = LibraryViewModel(repository: StubContentRepository(items: catalogItems, searchItems: searchItems))
+        let viewModel = LibraryViewModel(repository: StubContentRepository(items: defaultItems, searchItems: searchItems))
         await viewModel.loadCatalog()
 
         viewModel.searchText = ""
         await viewModel.search()
 
-        XCTAssertEqual(viewModel.items, catalogItems)
+        XCTAssertEqual(viewModel.items, defaultItems)
     }
 
     func testSearchWithQueryReturnsRepositorySearchResults() async {
-        let catalogItems = [
-            MediaCatalogItem(title: "Bundled", artist: "Artist", url: URL(string: "https://example.com/bundled.mp3")!)
+        let defaultItems = [
+            MediaCatalogItem(title: "Default", artist: "Artist", url: URL(string: "https://example.com/default.mp3")!)
         ]
         let searchItems = [
             MediaCatalogItem(title: "Freesound", artist: "Artist", url: URL(string: "https://example.com/found.mp3")!)
         ]
-        let viewModel = LibraryViewModel(repository: StubContentRepository(items: catalogItems, searchItems: searchItems))
+        let viewModel = LibraryViewModel(repository: StubContentRepository(items: defaultItems, searchItems: searchItems))
         await viewModel.loadCatalog()
 
         viewModel.searchText = "ocean"

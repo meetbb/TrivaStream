@@ -12,19 +12,25 @@ import Foundation
 ///
 /// Distinct from AudioStreamKit's `MediaItem`: this type carries a stable `id` for SwiftUI
 /// list identity, which `MediaItem` — a framework-boundary value type — has no reason to carry.
+///
+/// `id` must be derived from stable source content (e.g. Freesound's sound `id`) wherever a
+/// repository can supply one — a fresh random UUID on every fetch defeats SwiftUI's diffing,
+/// making `ForEach` treat an unchanged reload as entirely new rows and rebuild every cell.
 struct MediaCatalogItem: Identifiable, Equatable, Sendable {
-    let id: UUID
+    let id: String
     let title: String
     let artist: String
     let url: URL
     let artworkData: Data?
+    let thumbnailURL: URL?
 
-    init(id: UUID = UUID(), title: String, artist: String, url: URL, artworkData: Data? = nil) {
+    init(id: String = UUID().uuidString, title: String, artist: String, url: URL, artworkData: Data? = nil, thumbnailURL: URL? = nil) {
         self.id = id
         self.title = title
         self.artist = artist
         self.url = url
         self.artworkData = artworkData
+        self.thumbnailURL = thumbnailURL
     }
 }
 
